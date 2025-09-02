@@ -1,0 +1,9 @@
+# IDE files
+/.idea/
+/.vscode/
+
+# Build
+**/target
+
+# Secrets
+**/.secrets

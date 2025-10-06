@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["vehicle-manager-axum", "vehicle-manager-actix-web"]

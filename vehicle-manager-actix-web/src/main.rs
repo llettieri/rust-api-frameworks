@@ -1,15 +1,21 @@
 mod config;
 mod handlers;
-mod schemas;
 mod models;
+mod schemas;
 
 use crate::config::init_mongodb;
-use crate::handlers::init_root;
+use crate::handlers::init_v1;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use env_logger::Env;
 use mongodb::Client;
-use paperclip::actix::OpenApiExt;
+use utoipa::OpenApi;
+use utoipa_actix_web::{scope, AppExt};
+use utoipa_swagger_ui::SwaggerUi;
+
+#[derive(OpenApi)]
+#[openapi()]
+struct ApiDoc;
 
 #[derive(Clone)]
 struct AppState {
@@ -25,18 +31,17 @@ async fn main() -> std::io::Result<()> {
         service_name: String::from("vehicle"),
         db_client: init_mongodb().await,
     };
+    let base_route = format!("/{}", &state.service_name);
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(state.clone()))
-            .wrap_api()
-            .with_json_spec_at(format!("/{}/docs", &state.service_name).as_str())
-            .configure({
-                let base_root = format!("/{}", &state.service_name);
-                move |config| init_root(config, &base_root)
-            })
             .wrap(Logger::new("[%s] - %r - %a - %{User-Agent}i - [%Ts]"))
-            .build()
+            .into_utoipa_app()
+            .openapi(ApiDoc::openapi())
+            .service(scope(&*base_route).configure(init_v1))
+            .openapi_service(|api_doc| SwaggerUi::new("/docs/{_:.*}").url("/openapi.json", api_doc))
+            .into_app()
     })
     .bind(("127.0.0.1", 8080))?
     .workers(4)

@@ -1,9 +1,9 @@
 pub mod vehicles;
 
 use crate::handlers::vehicles::init_vehicles;
+use utoipa_actix_web::scope;
+use utoipa_actix_web::service_config::ServiceConfig;
 
-use paperclip::actix::web;
-
-pub fn init_root(config: &mut web::ServiceConfig, base_route: &String) {
-    config.service(web::scope(&base_route).service(web::scope("/v1").configure(init_vehicles)));
+pub fn init_v1(config: &mut ServiceConfig) {
+    config.service(scope("/v1").configure(init_vehicles));
 }

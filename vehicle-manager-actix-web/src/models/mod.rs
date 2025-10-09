@@ -1,1 +1,2 @@
-mod vehicle;
+pub mod repositories;
+pub mod vehicle;

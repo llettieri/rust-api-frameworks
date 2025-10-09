@@ -1,6 +1,6 @@
 pub mod vehicles;
 
-use crate::handlers::vehicles::init_vehicles;
+use crate::routers::vehicles::init_vehicles;
 use utoipa_actix_web::scope;
 use utoipa_actix_web::service_config::ServiceConfig;
 

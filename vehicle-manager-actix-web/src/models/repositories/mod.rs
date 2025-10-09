@@ -1,2 +1,1 @@
 pub mod vehicle;
-pub mod errors;

@@ -1,4 +1,4 @@
-pub mod vehicles;
+mod vehicles;
 
 use crate::routers::vehicles::init_vehicles;
 use utoipa_actix_web::scope;

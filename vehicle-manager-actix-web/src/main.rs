@@ -12,11 +12,13 @@ use crate::routers::init_v1;
 use crate::services::vehicle::VehicleService;
 use actix_web::http::StatusCode;
 use actix_web::middleware::{ErrorHandlerResponse, ErrorHandlers, Logger};
-use actix_web::{App, HttpServer, web};
+use actix_web::{web, App, HttpServer};
 use env_logger::Env;
 use utoipa::OpenApi;
-use utoipa_actix_web::{AppExt, scope};
+use utoipa_actix_web::{scope, AppExt};
 use utoipa_swagger_ui::SwaggerUi;
+
+const SERVICE_NAME: &str = "vehicle";
 
 #[derive(OpenApi)]
 #[openapi()]
@@ -32,9 +34,9 @@ struct AppState {
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
 
-    let database = init_mongodb().await.database("vehicle");
+    let database = init_mongodb(SERVICE_NAME).await;
     let state = AppState {
-        service_name: String::from("vehicle"),
+        service_name: String::from(SERVICE_NAME),
         vehicle_service: VehicleService::new(database.clone()),
     };
     let base_route = format!("/{}", &state.service_name);

@@ -11,6 +11,7 @@ pub struct Vehicle {
     pub mileage_in_km: i32,
 }
 
+/// Conversion from request schema to model entity.
 impl From<CreateVehicleSchema> for Vehicle {
     fn from(vehicle: CreateVehicleSchema) -> Self {
         Self {
@@ -23,6 +24,7 @@ impl From<CreateVehicleSchema> for Vehicle {
     }
 }
 
+/// Conversion from request schema to model entity.
 impl From<VehicleSchema> for Vehicle {
     fn from(vehicle: VehicleSchema) -> Self {
         Self {

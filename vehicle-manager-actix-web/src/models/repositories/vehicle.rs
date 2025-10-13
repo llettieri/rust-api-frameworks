@@ -1,9 +1,11 @@
 use crate::models::vehicle::Vehicle;
 use futures::TryStreamExt;
 use mongodb::bson::oid::ObjectId;
-use mongodb::bson::{Document, doc, to_bson};
+use mongodb::bson::{doc, to_bson, Document};
 use mongodb::{Collection, Database};
 
+/// Repository for managing vehicle entities in MongoDB.
+/// The usage of the repository is restricted to the service layer.
 #[derive(Debug, Clone)]
 pub struct VehicleRepository {
     collection: Collection<Vehicle>,

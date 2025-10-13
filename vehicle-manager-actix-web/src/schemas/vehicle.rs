@@ -1,6 +1,9 @@
 use crate::models::vehicle::Vehicle;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+/// Schema representing a vehicle.
+/// This schema is used for both request and response payloads.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct VehicleSchema {
     #[schema(example = "507f1f77bcf86cd799439011")]
@@ -15,6 +18,8 @@ pub struct VehicleSchema {
     pub mileage_in_km: i32,
 }
 
+/// Schema representing a new vehicle.
+/// This schema is used for response payloads.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CreateVehicleSchema {
     #[schema(example = "Audi")]
@@ -27,6 +32,7 @@ pub struct CreateVehicleSchema {
     pub mileage_in_km: i32,
 }
 
+/// Conversion from model entity to response schema.
 impl From<Vehicle> for VehicleSchema {
     fn from(vehicle: Vehicle) -> Self {
         Self {

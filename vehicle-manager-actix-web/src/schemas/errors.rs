@@ -4,6 +4,9 @@ use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use derive_more::{Display, Error};
 
+/// Centralized API error types.
+/// These errors are returned to the client with appropriate HTTP status codes and messages.
+/// The usage of these errors is restricted to the controller/router layer.
 #[derive(Debug, Display, Error)]
 pub enum ApiError {
     #[display("E_INVALID_OBJECT_ID")]

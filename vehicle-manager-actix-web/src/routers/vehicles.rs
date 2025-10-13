@@ -1,20 +1,22 @@
 use crate::schemas::vehicle::{CreateVehicleSchema, VehicleSchema};
 use core::convert::Into;
 
-use crate::AppState;
 use crate::helpers::pagination::{Page, Pagination};
 use crate::schemas::errors::ApiError;
-use actix_web::{Error, HttpResponse, get, post, put, web};
+use crate::AppState;
+use actix_web::{delete, get, post, put, web, Error, HttpResponse};
 use utoipa_actix_web::scope;
 use utoipa_actix_web::service_config::ServiceConfig;
 
+/// Initialize vehicle routes.
 pub fn init_vehicles(config: &mut ServiceConfig) {
     config.service(
         scope("/vehicles")
             .service(get_vehicles)
             .service(create_vehicle)
             .service(get_vehicle)
-            .service(update_vehicle),
+            .service(update_vehicle)
+            .service(delete_vehicle),
     );
 }
 #[utoipa::path(
@@ -91,4 +93,25 @@ async fn update_vehicle(
     }
 
     Ok(web::Json(vehicle.unwrap().into()))
+}
+
+#[utoipa::path(
+    tag = "vehicle",
+    responses(
+        (status = NO_CONTENT, description = "No Content"),
+        (status = BAD_REQUEST, body = String, description = "Bad Request", example = "E_BAD_REQUEST"),
+    ))
+]
+#[delete("/{vehicle_id}")]
+async fn delete_vehicle(
+    vehicle_id: web::Path<String>,
+    state: web::Data<AppState>,
+) -> Result<HttpResponse, Error> {
+    state
+        .vehicle_service
+        .delete_vehicle(&vehicle_id)
+        .await
+        .map_err(|_| ApiError::InvalidObjectId)?;
+
+    Ok(HttpResponse::NoContent().finish())
 }

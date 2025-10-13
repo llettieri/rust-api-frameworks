@@ -2,9 +2,9 @@ use crate::helpers::pagination::Page;
 use crate::models::repositories::vehicle::VehicleRepository;
 use crate::models::vehicle::Vehicle;
 use crate::schemas::vehicle::{CreateVehicleSchema, VehicleSchema};
-use mongodb::Database;
 use mongodb::bson::oid;
 use mongodb::bson::oid::ObjectId;
+use mongodb::Database;
 
 #[derive(Debug, Clone)]
 pub struct VehicleService {
@@ -42,5 +42,14 @@ impl VehicleService {
 
     pub async fn update_vehicle(&self, vehicle: VehicleSchema) -> Option<Vehicle> {
         self.vehicle_repository.update_vehicle(vehicle.into()).await
+    }
+
+    pub async fn delete_vehicle(&self, vehicle_id: &String) -> Result<(), oid::Error> {
+        let vehicle_id = ObjectId::parse_str(vehicle_id)?;
+
+        Ok(self
+            .vehicle_repository
+            .delete_vehicle_by_id(vehicle_id)
+            .await)
     }
 }

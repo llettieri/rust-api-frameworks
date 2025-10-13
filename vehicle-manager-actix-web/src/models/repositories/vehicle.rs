@@ -65,4 +65,11 @@ impl VehicleRepository {
 
         result.unwrap_or_else(|_| None)
     }
+
+    pub async fn delete_vehicle_by_id(&self, vehicle_id: ObjectId) -> () {
+        self.collection
+            .delete_one(doc! {"_id": &vehicle_id})
+            .await
+            .unwrap();
+    }
 }

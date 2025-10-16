@@ -3,7 +3,7 @@ use utoipa::{IntoParams, ToSchema};
 
 /// Page of a generic list of items. Can be used for data fetching with the models
 /// and also for the schema responses.
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Page<T> {
     pub items: Vec<T>,
     pub size: u32,

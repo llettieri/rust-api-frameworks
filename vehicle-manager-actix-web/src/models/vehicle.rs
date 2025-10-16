@@ -1,14 +1,24 @@
+use crate::models::BaseDocument;
 use crate::schemas::vehicle::{CreateVehicleSchema, VehicleSchema};
+use chrono::{DateTime, Utc};
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Vehicle {
-    pub _id: ObjectId,
+    _id: ObjectId,
+    created_at: DateTime<Utc>,
+    updated_at: DateTime<Utc>,
     pub brand: String,
     pub model: String,
     pub ps: i32,
     pub mileage_in_km: i32,
+}
+
+impl BaseDocument for Vehicle {
+    fn id(&self) -> ObjectId {
+        self._id
+    }
 }
 
 /// Conversion from request schema to model entity.
@@ -16,6 +26,8 @@ impl From<CreateVehicleSchema> for Vehicle {
     fn from(vehicle: CreateVehicleSchema) -> Self {
         Self {
             _id: Default::default(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
             brand: vehicle.brand,
             model: vehicle.model,
             ps: vehicle.ps,
@@ -29,6 +41,8 @@ impl From<VehicleSchema> for Vehicle {
     fn from(vehicle: VehicleSchema) -> Self {
         Self {
             _id: vehicle.id.parse().unwrap(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
             brand: vehicle.brand,
             model: vehicle.model,
             ps: vehicle.ps,

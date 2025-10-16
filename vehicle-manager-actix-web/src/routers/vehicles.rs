@@ -115,3 +115,85 @@ async fn delete_vehicle(
 
     Ok(HttpResponse::NoContent().finish())
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::config::init_mongodb;
+    use crate::helpers::pagination::Page;
+    use crate::routers::init_v1;
+    use crate::schemas::vehicle::{CreateVehicleSchema, VehicleSchema};
+    use crate::services::vehicle::VehicleService;
+    use crate::{AppState, SERVICE_NAME};
+    use actix_http::Request;
+    use actix_web::dev::{Service, ServiceResponse};
+    use actix_web::{test, web, App};
+    use serde_json;
+    use testcontainers::core::ContainerPort;
+    use testcontainers::runners::AsyncRunner;
+    use testcontainers::ImageExt;
+    use testcontainers_modules::mongo::Mongo;
+    use utoipa_actix_web::AppExt;
+
+    async fn test_mongodb() {
+        let container = Mongo::default()
+            .with_mapped_port(27017, ContainerPort::Tcp(27017))
+            .start()
+            .await
+            .unwrap();
+    }
+
+    pub async fn test_app()
+    -> impl Service<Request, Response = ServiceResponse, Error = actix_web::Error> {
+        test_mongodb().await;
+        let database = init_mongodb(SERVICE_NAME).await;
+        let state = AppState {
+            service_name: String::from(SERVICE_NAME),
+            vehicle_service: VehicleService::new(database.clone()),
+        };
+
+        test::init_service(
+            App::new()
+                .app_data(web::Data::new(state.clone()))
+                .into_utoipa_app()
+                .configure(|config| init_v1(config, &state.service_name))
+                .into_app(),
+        )
+        .await
+    }
+
+    #[actix_web::test]
+    async fn test_create_vehicle() {
+        let app = test_app().await;
+
+        let request = test::TestRequest::post()
+            .uri("/vehicle/v1/vehicles")
+            .set_json(CreateVehicleSchema {
+                brand: "Toyota".to_string(),
+                model: "Corolla".to_string(),
+                ps: 120,
+                mileage_in_km: 50000,
+            })
+            .to_request();
+        let response = test::call_service(&app, request).await;
+
+        assert!(response.status().is_success());
+    }
+
+    #[actix_web::test]
+    async fn test_get_vehicles() {
+        let app = test_app().await;
+
+        let request = test::TestRequest::get()
+            .uri("/vehicle/v1/vehicles")
+            .to_request();
+        let response = test::call_service(&app, request).await;
+        assert!(response.status().is_success());
+
+        let body_bytes = test::read_body(response).await;
+        let page: Page<VehicleSchema> = serde_json::from_slice(&body_bytes).unwrap();
+
+        assert_eq!(page.page, 1);
+        assert_eq!(page.size, 50);
+        assert_eq!(page.total, 1);
+    }
+}

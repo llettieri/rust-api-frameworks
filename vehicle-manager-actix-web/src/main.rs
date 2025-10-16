@@ -1,5 +1,3 @@
-extern crate core;
-
 mod config;
 mod helpers;
 mod models;
@@ -15,7 +13,7 @@ use actix_web::middleware::{ErrorHandlerResponse, ErrorHandlers, Logger};
 use actix_web::{web, App, HttpServer};
 use env_logger::Env;
 use utoipa::OpenApi;
-use utoipa_actix_web::{scope, AppExt};
+use utoipa_actix_web::AppExt;
 use utoipa_swagger_ui::SwaggerUi;
 
 const SERVICE_NAME: &str = "vehicle";
@@ -25,7 +23,7 @@ const SERVICE_NAME: &str = "vehicle";
 struct ApiDoc;
 
 #[derive(Clone)]
-struct AppState {
+pub struct AppState {
     service_name: String,
     vehicle_service: VehicleService,
 }
@@ -39,7 +37,6 @@ async fn main() -> std::io::Result<()> {
         service_name: String::from(SERVICE_NAME),
         vehicle_service: VehicleService::new(database.clone()),
     };
-    let base_route = format!("/{}", &state.service_name);
 
     HttpServer::new(move || {
         App::new()
@@ -54,7 +51,7 @@ async fn main() -> std::io::Result<()> {
             )
             .into_utoipa_app()
             .openapi(ApiDoc::openapi())
-            .service(scope(&*base_route).configure(init_v1))
+            .configure(|config| init_v1(config, &state.service_name))
             .openapi_service(|api_doc| SwaggerUi::new("/docs/{_:.*}").url("/openapi.json", api_doc))
             .into_app()
     })

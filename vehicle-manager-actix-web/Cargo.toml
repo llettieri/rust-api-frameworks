@@ -14,3 +14,10 @@ utoipa-actix-web = "0.1"
 utoipa = { version = "5", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "9", features = ["actix-web"] }
 derive_more = "2"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+testcontainers = "*"
+testcontainers-modules = { version = "*", features = ["mongo"] }
+actix-http = "*"
+serde_json = "*"

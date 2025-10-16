@@ -1,4 +1,5 @@
 use crate::models::vehicle::Vehicle;
+use crate::models::BaseDocument;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -36,7 +37,7 @@ pub struct CreateVehicleSchema {
 impl From<Vehicle> for VehicleSchema {
     fn from(vehicle: Vehicle) -> Self {
         Self {
-            id: vehicle._id.to_string(),
+            id: vehicle.id().to_string(),
             brand: vehicle.brand,
             model: vehicle.model,
             ps: vehicle.ps,
